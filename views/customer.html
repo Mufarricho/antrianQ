@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Antrian Online</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/customer.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h2>Sistem Antrian Online</h2>
+                    </div>
+                    <div class="card-body">
+                        <!-- Form Registrasi Antrian -->
+                        <div id="registrationForm">
+                            <h3 class="text-center mb-4">Daftar Antrian</h3>
+                            <div class="mb-3">
+                                <label for="nama" class="form-label">Nama</label>
+                                <input type="text" class="form-control" id="nama" placeholder="Masukkan nama Anda">
+                            </div>
+                            <button id="daftarBtn" class="btn btn-primary w-100">Ambil Nomor Antrian</button>
+                        </div>
+
+                        <!-- Tampilan Nomor Antrian -->
+                        <div id="queueInfo" class="text-center" style="display: none;">
+                            <h3 class="mb-4">Informasi Antrian Anda</h3>
+                            <div class="queue-number">
+                                <span id="nomorAntrian">0</span>
+                            </div>
+                            <p class="mt-3">Nama: <span id="namaCustomer"></span></p>
+                            <hr>
+                            <div class="status-container">
+                                <h4>Status Antrian:</h4>
+                                <div id="statusAntrian" class="status waiting">
+                                    Menunggu
+                                </div>
+                            </div>
+                            <div id="notifikasi" class="alert alert-success mt-3" style="display: none;">
+                                Pesanan Anda selesai dan siap diambil!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p>Terima kasih telah menggunakan layanan kami</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="/js/customer.js"></script>
+</body>
+</html>

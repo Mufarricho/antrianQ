@@ -1,0 +1,56 @@
+/* Admin CSS */
+body {
+    background-color: #f0f2f5;
+    font-family: 'Arial', sans-serif;
+}
+
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 15px;
+}
+
+.status-badge {
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.status-waiting {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.status-process {
+    background-color: #0dcaf0;
+    color: #fff;
+}
+
+.status-done {
+    background-color: #198754;
+    color: #fff;
+}
+
+.btn-process, .btn-done {
+    border-radius: 5px;
+    width: 120px;
+    margin: 0 3px;
+}
+
+.card h3 {
+    font-size: 36px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.table {
+    vertical-align: middle;
+}
+
+#refreshBtn {
+    padding: 10px 20px;
+}

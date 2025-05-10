@@ -1,0 +1,69 @@
+/* Customer CSS */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+}
+
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 20px;
+}
+
+.queue-number {
+    font-size: 72px;
+    font-weight: bold;
+    color: #0d6efd;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 5px solid #0d6efd;
+}
+
+.status {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 15px auto;
+    max-width: 200px;
+}
+
+.status.waiting {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.status.process {
+    background-color: #0dcaf0;
+    color: #fff;
+}
+
+.status.done {
+    background-color: #198754;
+    color: #fff;
+}
+
+.status-container {
+    margin-top: 20px;
+}
+
+#notifikasi {
+    display: none;
+    margin-top: 20px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
