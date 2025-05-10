@@ -42,11 +42,18 @@ Karena Vercel tidak menyediakan database MySQL, Anda perlu menggunakan layanan d
    DB_USER=your-database-username
    DB_PASSWORD=your-database-password
    DB_NAME=your-database-name
+   DB_SSL=true
    PORT=3001
    NODE_ENV=production
    ```
 
-2. Saat deploy ke Vercel, Anda perlu menambahkan environment variables yang sama di dashboard Vercel
+2. Saat deploy ke Vercel, Anda perlu menambahkan environment variables yang sama di dashboard Vercel:
+   - Buka dashboard Vercel
+   - Pilih project Anda
+   - Klik "Settings" > "Environment Variables"
+   - Tambahkan semua variabel di atas satu per satu
+   - **PENTING**: Pastikan `NODE_ENV` diatur ke `production`
+   - **PENTING**: Jika menggunakan PlanetScale, atur `DB_SSL=true`
 
 ### Deploy ke Vercel
 
@@ -85,3 +92,39 @@ Karena Vercel tidak menyediakan database MySQL, Anda perlu menggunakan layanan d
 - `database.js` - Konfigurasi dan fungsi database
 - `public/` - File statis (CSS, JavaScript, gambar)
 - `views/` - File HTML
+
+## Troubleshooting
+
+### Error "Terjadi kesalahan server: connect ECONNREFUSED 127.0.0.1:3306"
+
+Jika Anda mendapatkan error ini setelah deploy ke Vercel, berarti aplikasi masih mencoba terhubung ke database lokal. Untuk memperbaikinya:
+
+1. Pastikan Anda telah mengatur environment variables di dashboard Vercel:
+   - `NODE_ENV=production` (sangat penting)
+   - `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` dengan nilai yang benar dari penyedia database cloud Anda
+   - `DB_SSL=true` jika penyedia database Anda memerlukan koneksi SSL
+
+2. Redeploy aplikasi Anda setelah mengatur environment variables:
+   ```
+   vercel --prod
+   ```
+
+3. Jika masih bermasalah, coba periksa log di dashboard Vercel untuk melihat error yang lebih detail
+
+### Error SSL/TLS dengan Database
+
+Jika Anda mengalami masalah SSL dengan database:
+
+1. Pastikan `DB_SSL=true` diatur di environment variables
+2. Jika menggunakan sertifikat self-signed, aplikasi sudah dikonfigurasi untuk menerima sertifikat tersebut (`rejectUnauthorized: false`)
+
+### Cara Memeriksa Environment Variables di Vercel
+
+1. Buka dashboard Vercel
+2. Pilih project Anda
+3. Klik tab "Deployments"
+4. Pilih deployment terbaru
+5. Klik tab "Logs"
+6. Cari log yang menampilkan "Running in production mode" dan "Database connection config"
+
+Jika log menampilkan "Running in development mode", berarti `NODE_ENV` tidak diatur dengan benar

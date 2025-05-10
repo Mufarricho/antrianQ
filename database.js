@@ -1,8 +1,10 @@
 // database.js
 const mysql = require('mysql2/promise');
+require('dotenv').config();
 
 // Konfigurasi koneksi database
 const isDevelopment = process.env.NODE_ENV !== 'production';
+console.log(`Running in ${isDevelopment ? 'development' : 'production'} mode`);
 
 // Konfigurasi database berdasarkan environment
 const dbConfig = {
@@ -26,14 +28,29 @@ const dbConfig = {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    ssl: {
-      rejectUnauthorized: true
-    }
+    ssl: process.env.DB_SSL === 'true' ? {
+      rejectUnauthorized: false // Set to false to accept self-signed certificates
+    } : undefined
   }
 };
 
+// Log database config (without sensitive info)
+const configToUse = isDevelopment ? dbConfig.development : dbConfig.production;
+console.log('Database connection config:', {
+  host: configToUse.host,
+  database: configToUse.database,
+  ssl: configToUse.ssl ? 'enabled' : 'disabled'
+});
+
 // Gunakan konfigurasi sesuai environment
-const pool = mysql.createPool(isDevelopment ? dbConfig.development : dbConfig.production);
+let pool;
+try {
+  pool = mysql.createPool(isDevelopment ? dbConfig.development : dbConfig.production);
+  console.log('Database pool created successfully');
+} catch (error) {
+  console.error('Failed to create database pool:', error);
+  throw error;
+}
 
 // Inisialisasi database
 async function initDatabase() {

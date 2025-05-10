@@ -32,6 +32,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
+            // Tampilkan loading indicator
+            daftarBtn.disabled = true;
+            daftarBtn.textContent = 'Memproses...';
+            
             const response = await fetch('/api/queue', {
                 method: 'POST',
                 headers: {
@@ -41,9 +45,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                throw new Error('Gagal mendaftar antrian');
+                const errorData = await response.text();
+                console.error('API Error:', errorData);
+                
+                // Coba parse error sebagai JSON jika memungkinkan
+                let errorMessage = 'Gagal mendaftar antrian';
+                try {
+                    const parsedError = JSON.parse(errorData);
+                    if (parsedError.error) {
+                        errorMessage = parsedError.error;
+                        
+                        // Jika error terkait database, berikan pesan yang lebih spesifik
+                        if (errorMessage.includes('ECONNREFUSED') || errorMessage.includes('database')) {
+                            errorMessage = 'Tidak dapat terhubung ke database. Silakan hubungi administrator.';
+                        }
+                    }
+                } catch (e) {
+                    // Jika bukan JSON, gunakan error text langsung
+                    if (errorData) errorMessage = errorData;
+                }
+                
+                throw new Error(errorMessage);
             }
             
             const data = await response.json();
@@ -69,7 +91,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat mendaftar antrian');
+            alert(error.message || 'Terjadi kesalahan saat mendaftar antrian');
+        } finally {
+            // Reset button state
+            daftarBtn.disabled = false;
+            daftarBtn.textContent = 'Daftar';
         }
     });
     
