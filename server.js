@@ -1,4 +1,9 @@
 // server.js
+// Memuat variabel lingkungan dari file .env jika ada
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const express = require('express');
 const http = require('http');
 const path = require('path');
@@ -143,5 +148,6 @@ io.on('connection', (socket) => {
 // Jalankan server
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
-  console.log(`Server berjalan di http://localhost:${PORT}`);
+  console.log(`Server berjalan di port ${PORT}`);
+  console.log(`Mode: ${process.env.NODE_ENV || 'development'}`);
 });

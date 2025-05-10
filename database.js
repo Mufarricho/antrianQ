@@ -2,20 +2,51 @@
 const mysql = require('mysql2/promise');
 
 // Konfigurasi koneksi database
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '', // Password kosong, sesuaikan dengan konfigurasi MySQL Anda
-  database: 'antrian_online',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// Konfigurasi database berdasarkan environment
+const dbConfig = {
+  // Konfigurasi untuk development (lokal)
+  development: {
+    host: 'localhost',
+    user: 'root',
+    password: '', // Password kosong, sesuaikan dengan konfigurasi MySQL Anda
+    database: 'antrian_online',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  },
+  // Konfigurasi untuk production (Vercel)
+  production: {
+    // Gunakan environment variables untuk menyimpan kredensial database
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    ssl: {
+      rejectUnauthorized: true
+    }
+  }
+};
+
+// Gunakan konfigurasi sesuai environment
+const pool = mysql.createPool(isDevelopment ? dbConfig.development : dbConfig.production);
 
 // Inisialisasi database
 async function initDatabase() {
   try {
-    // Membuat koneksi ke MySQL tanpa memilih database
+    // Jika di production, skip pembuatan database karena biasanya sudah dibuat
+    if (!isDevelopment) {
+      console.log('Skipping database creation in production environment');
+      // Langsung buat tabel menggunakan pool yang sudah terhubung ke database
+      await createTables();
+      return;
+    }
+    
+    // Membuat koneksi ke MySQL tanpa memilih database (hanya untuk development)
     const tempConnection = await mysql.createConnection({
       host: 'localhost',
       user: 'root',
@@ -29,35 +60,7 @@ async function initDatabase() {
     await tempConnection.end();
     
     // Gunakan pool untuk membuat tabel
-    const connection = await pool.getConnection();
-    
-    // Membuat tabel antrian
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS antrian (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nama VARCHAR(100) NOT NULL,
-        nomor_antrian INT NOT NULL,
-        status ENUM('menunggu', 'proses', 'selesai') DEFAULT 'menunggu',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    
-    // Membuat tabel counter untuk nomor antrian
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS counter (
-        id INT PRIMARY KEY DEFAULT 1,
-        nilai INT DEFAULT 0
-      )
-    `);
-    
-    // Cek apakah counter sudah ada datanya
-    const [rows] = await connection.query('SELECT * FROM counter WHERE id = 1');
-    if (rows.length === 0) {
-      // Jika belum ada, inisialisasi counter
-      await connection.query('INSERT INTO counter (id, nilai) VALUES (1, 0)');
-    }
-    
-    connection.release();
+    await createTables();
     console.log('Database berhasil diinisialisasi');
   } catch (error) {
     console.error('Error saat inisialisasi database:', error);
@@ -178,6 +181,43 @@ async function deleteQueue(id) {
   } catch (error) {
     console.error('Error saat menghapus antrian:', error);
     throw error;
+  }
+}
+
+// Fungsi untuk membuat tabel
+async function createTables() {
+  const connection = await pool.getConnection();
+  try {
+    // Membuat tabel antrian
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS antrian (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nama VARCHAR(100) NOT NULL,
+        nomor_antrian INT NOT NULL,
+        status ENUM('menunggu', 'proses', 'selesai') DEFAULT 'menunggu',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    // Membuat tabel counter untuk nomor antrian
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS counter (
+        id INT PRIMARY KEY DEFAULT 1,
+        nilai INT DEFAULT 0
+      )
+    `);
+    
+    // Cek apakah counter sudah ada datanya
+    const [rows] = await connection.query('SELECT * FROM counter WHERE id = 1');
+    if (rows.length === 0) {
+      // Jika belum ada, inisialisasi counter
+      await connection.query('INSERT INTO counter (id, nilai) VALUES (1, 0)');
+    }
+  } catch (error) {
+    console.error('Error creating tables:', error);
+    throw error;
+  } finally {
+    connection.release();
   }
 }
 
