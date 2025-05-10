@@ -45,10 +45,42 @@ console.log('Database connection config:', {
 // Gunakan konfigurasi sesuai environment
 let pool;
 try {
-  pool = mysql.createPool(isDevelopment ? dbConfig.development : dbConfig.production);
+  // Log environment variables (without sensitive info)
+  console.log('Environment variables check:', {
+    NODE_ENV: process.env.NODE_ENV,
+    DB_HOST: process.env.DB_HOST ? 'Set' : 'Not set',
+    DB_USER: process.env.DB_USER ? 'Set' : 'Not set',
+    DB_PASSWORD: process.env.DB_PASSWORD ? 'Set (value hidden)' : 'Not set',
+    DB_NAME: process.env.DB_NAME ? 'Set' : 'Not set',
+    DB_SSL: process.env.DB_SSL
+  });
+  
+  const config = isDevelopment ? dbConfig.development : dbConfig.production;
+  console.log('Attempting to create database pool with config:', {
+    host: config.host,
+    database: config.database,
+    ssl: config.ssl ? 'enabled' : 'disabled'
+  });
+  
+  pool = mysql.createPool(config);
   console.log('Database pool created successfully');
+  
+  // Test the connection
+  pool.getConnection()
+    .then(connection => {
+      console.log('Database connection test successful');
+      connection.release();
+    })
+    .catch(err => {
+      console.error('Database connection test failed:', err.message);
+      console.error('Error code:', err.code);
+      console.error('Error errno:', err.errno);
+      console.error('Error sqlState:', err.sqlState);
+      console.error('Error sqlMessage:', err.sqlMessage);
+    });
 } catch (error) {
   console.error('Failed to create database pool:', error);
+  console.error('Error details:', error.message);
   throw error;
 }
 
